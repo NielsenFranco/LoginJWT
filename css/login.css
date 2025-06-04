@@ -1,0 +1,137 @@
+body {
+  margin: 0; 
+  padding: 0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #91b9f4;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  width: 320px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+form {
+  display: none; /* por defecto oculto, controlado por clase .active */
+}
+
+form.active {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.token-display {
+  word-break: break-word;
+}
+
+/* Wrapper para input y ojo */
+.password-wrapper {
+  position: relative;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.password-wrapper input[type="password"] {
+  padding-right: 1rem;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Icono ojo para todos los inputs de contraseña */
+.password-wrapper img.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  user-select: none;
+  background: transparent;
+  object-fit: contain;
+  pointer-events: auto;
+}
+
+button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.message {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.message.error {
+  color: #d93025;
+}
+
+.message.success {
+  color: #188038;
+}
+
+/* Pestañas (login / register) */
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #ccc;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.3s, color 0.3s;
+  color: black;
+}
+
+.tabs button.active {
+  border-color: #007bff;
+  color: #007bff;
+}

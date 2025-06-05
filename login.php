@@ -3,10 +3,14 @@ require_once 'includes/conexion.php';
 require_once 'includes/user.php';
 session_start();
 
-// Procesar login vía JSON fetch (AJAX)
-$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+// Detectar si es una petición JSON con Content-Type correcto
+$isJson = $_SERVER['REQUEST_METHOD'] === 'POST' && (
+    (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) ||
+    (isset($_SERVER['HTTP_CONTENT_TYPE']) && strpos($_SERVER['HTTP_CONTENT_TYPE'], 'application/json') !== false)
+);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($contentType, 'application/json') !== false) {
+// Procesar login vía JSON fetch (AJAX)
+if ($isJson) {
     header('Content-Type: application/json');
     $input = json_decode(file_get_contents('php://input'), true);
 
@@ -16,19 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($contentType, 'application/j
     }
 
     $user = new User();
-    $token = $user->login($input['username'], $input['password']);
+    $result = $user->login($input['username'], $input['password']); // Devuelve array o false
 
-    if ($token) {
+    if ($result && isset($result['token'])) {
+        $token = $result['token'];
         $_SESSION['jwt'] = $token;
 
-        // ✅ Guardar token como cookie (1 hora)
+        // Guardar token como cookie (1 hora)
         setcookie('token', $token, time() + 3600, "/");
 
-        // ✅ Enviar token en el JSON
+        // Enviar token y datos de usuario en el JSON
         echo json_encode([
             'success' => true,
             'message' => 'Inicio de sesión exitoso',
-            'token' => $token
+            'token' => $token,
+            'user' => $result['user']
         ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Usuario o contraseña incorrectos.']);
@@ -37,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($contentType, 'application/j
 }
 
 // Procesar registro (form POST normal)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_SERVER['HTTP_CONTENT_TYPE'])) {
-    // Es un form POST normal (no JSON fetch), asumimos registro
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isJson) {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -67,8 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_SERVER['HTTP_CONTENT_TYPE'
                 $stmt->close();
 
                 $passwordHasheada = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $con->prepare("INSERT INTO usuarios (username, email, password) VALUES (?, ?, ?)");
-                $stmt->bind_param("sss", $username, $email, $passwordHasheada);
+                $jwtSecret = bin2hex(random_bytes(32)); // 64 caracteres hex
+
+                $stmt = $con->prepare("INSERT INTO usuarios (username, email, password, jwt_secret) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("ssss", $username, $email, $passwordHasheada, $jwtSecret);
 
                 if ($stmt->execute()) {
                     $success = "Usuario registrado con éxito. Por favor, inicie sesión.";

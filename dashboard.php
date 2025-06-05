@@ -57,8 +57,8 @@ if (isApiRequest()) {
 }
 
 // Si no es fetch, mostrar dashboard HTML completo:
-$username = $payload->username ?? 'Usuario';
-$email = $payload->email ?? 'Sin email';
+$username = $payload->data->username ?? 'Usuario';
+$email = $payload->data->email ?? 'Sin email';
 ?>
 
 <!DOCTYPE html>
